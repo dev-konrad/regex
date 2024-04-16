@@ -1,1 +1,1 @@
-grep -o '\${[^}]*}' application.yml | sed -E 's/\./_/g' | envsubst
+grep -o '\${[^}]*}' application.yml | sed -E 's/\.;*$//; s/\./_/g' | envsubst
