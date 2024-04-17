@@ -1,15 +1,41 @@
-# Generate a random folder name
-random_folder=$(mktemp -d /tmp/random_folder.XXXXXX)
+import net.sourceforge.plantuml.SourceStringReader;
 
-# Extract the JAR file into the random folder
-jar_file="example.jar"
-jar xf "$jar_file" -C "$random_folder"
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.UUID;
 
-# Find an example file within the extracted JAR
-example_file=$(find "$random_folder" -type f | head -n 1)
+public class PlantUMLExample {
 
-# Print the example file
-cat "$example_file"
+    public static void main(String[] args) {
+        String umlCode = "@startuml\n" +
+                "Component A\n" +
+                "Component B\n" +
+                "Rel(A, B, \" \")\n" +
+                "@enduml";
 
-# Delete the random folder
-rm -rf "$random_folder"
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            SourceStringReader reader = new SourceStringReader(umlCode);
+            String desc = reader.generateImage(outputStream);
+            outputStream.close();
+
+            // Generate a random identifier for the SVG file name
+            String randomIdentifier = UUID.randomUUID().toString().substring(0, 8);
+
+            // Save the SVG to a temporary folder with a unique name
+            File tempFolder = new File(System.getProperty("java.io.tmpdir"));
+            String svgFileName = "uml_diagram_" + randomIdentifier + ".svg";
+            String svgFilePath = tempFolder.getAbsolutePath() + File.separator + svgFileName;
+            FileOutputStream fileOutputStream = new FileOutputStream(svgFilePath);
+            outputStream.writeTo(fileOutputStream);
+            fileOutputStream.close();
+
+            System.out.println("SVG saved to: " + svgFilePath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
