@@ -1,88 +1,15 @@
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
-import org.springframework.core.io.ByteArrayResource;
+# Generate a random folder name
+random_folder=$(mktemp -d /tmp/random_folder.XXXXXX)
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+# Extract the JAR file into the random folder
+jar_file="example.jar"
+jar xf "$jar_file" -C "$random_folder"
 
-@SpringBootApplication
-public class Application {
+# Find an example file within the extracted JAR
+example_file=$(find "$random_folder" -type f | head -n 1)
 
-    public static void main(String[] args) throws IOException {
-        // Create a custom environment
-        CustomEnvironment environment = new CustomEnvironment();
+# Print the example file
+cat "$example_file"
 
-        // Set environment variables
-        environment.setEnvironmentVariable("MY_PROPERTY", "my_value");
-
-        // Run the application with the custom environment
-        SpringApplication application = new SpringApplication(Application.class);
-        application.setEnvironment(environment);
-        application.run(args);
-    }
-
-    public Application(ConfigurableEnvironment environment) throws IOException {
-        // Your application.yml content as a string
-        String yamlContent = "my:\n  property: ${MY_PROPERTY}";
-
-        // Load YAML content into a PropertySource
-        PropertySource<?> yamlPropertySource = loadYamlFromMemory("custom-config", yamlContent);
-
-        // Add the PropertySource to the environment
-        environment.getPropertySources().addFirst(yamlPropertySource);
-
-        // Resolve placeholders
-        String resolvedYamlContent = resolvePlaceholders(yamlContent, environment);
-
-        // Convert YAML content to JsonNode
-        JsonNode jsonNode = convertYamlToJson(resolvedYamlContent);
-
-        // Print JsonNode
-        System.out.println("JsonNode: " + jsonNode);
-    }
-
-    private PropertySource<?> loadYamlFromMemory(String name, String yamlContent) throws IOException {
-        YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
-        Map<String, Object> source = new HashMap<>();
-        source.put(name, yamlContent);
-        return loader.load(name, new ByteArrayResource(yamlContent.getBytes())).get(0);
-    }
-
-    private String resolvePlaceholders(String yamlContent, ConfigurableEnvironment environment) {
-        return environment.resolvePlaceholders(yamlContent);
-    }
-
-    private JsonNode convertYamlToJson(String yamlContent) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readTree(yamlContent);
-    }
-
-    // Custom environment extending StandardEnvironment
-    private static class CustomEnvironment extends org.springframework.core.env.StandardEnvironment {
-        CustomEnvironment() {
-            super();
-        }
-
-        void setEnvironmentVariable(String name, String value) {
-            MutablePropertySources propertySources = getPropertySources();
-            Map<String, Object> map = new HashMap<>();
-            map.put(name, value);
-            PropertySource<?> propertySource = new org.springframework.core.env.MapPropertySource("customEnv", map);
-            propertySources.addFirst(propertySource);
-        }
-
-        @Override
-        public Map<String, Object> getSystemEnvironment() {
-            // Override to return an empty map to exclude system environment variables
-            return new HashMap<>();
-        }
-    }
-}
+# Delete the random folder
+rm -rf "$random_folder"
