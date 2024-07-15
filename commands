@@ -15,9 +15,7 @@
         }
 
         #draggable-image {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: relative; /* Changed from absolute to relative */
             width: auto;
             height: 100%; /* Ensure the image is initially fitting the container's height */
             transform-origin: top left;
@@ -77,6 +75,10 @@
 
                 img.style.transformOrigin = `${offsetX * 100}% ${offsetY * 100}%`;
                 img.style.transform = `translate(${initialX}px, ${initialY}px) scale(${scale})`;
+
+                // Adjust container's scroll to accommodate the new image size
+                container.scrollLeft = -initialX;
+                container.scrollTop = -initialY;
             }
         });
     </script>
