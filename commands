@@ -1,94 +1,73 @@
-import os
-import requests
-from zipfile import ZipFile
-from io import BytesIO
-
-# File containing URLs
-urls_file = 'urls.txt'
-
-# Directory to save downloaded ZIP files and extracted contents
-download_dir = 'downloads'
-extract_dir = 'extracted'
-
-# Create directories if they don't exist
-os.makedirs(download_dir, exist_ok=True)
-os.makedirs(extract_dir, exist_ok=True)
-
-def download_and_extract_zip(url, download_path, extract_path):
-    try:
-        # Download the file
-        print(f"Downloading {url}")
-        response = requests.get(url)
-        response.raise_for_status()
-
-        # Save the ZIP file
-        zip_filename = os.path.join(download_path, url.split('/')[-1])
-        with open(zip_filename, 'wb') as file:
-            file.write(response.content)
-
-        # Extract the ZIP file
-        with ZipFile(zip_filename, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-        print(f"Extracted {zip_filename} to {extract_path}")
-
-    except requests.RequestException as e:
-        print(f"Failed to download {url}: {e}")
-    except zipfile.BadZipFile as e:
-        print(f"Failed to extract {zip_filename}: {e}")
-
-def main():
-    # Read URLs from the file
-    with open(urls_file, 'r') as file:
-        urls = [line.strip() for line in file if line.strip()]
-
-    # Download and extract each ZIP file
-    for url in urls:
-        download_and_extract_zip(url, download_dir, extract_dir)
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-import net.sourceforge.plantuml.SourceStringReader;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.UUID;
-
-public class PlantUMLExample {
-
-    public static void main(String[] args) {
-        String umlCode = "@startuml\n" +
-                "Component A\n" +
-                "Component B\n" +
-                "Rel(A, B, \" \")\n" +
-                "@enduml";
-
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            SourceStringReader reader = new SourceStringReader(umlCode);
-            String desc = reader.generateImage(outputStream);
-            outputStream.close();
-
-            // Generate a random identifier for the SVG file name
-            String randomIdentifier = UUID.randomUUID().toString().substring(0, 8);
-
-            // Save the SVG to a temporary folder with a unique name
-            File tempFolder = new File(System.getProperty("java.io.tmpdir"));
-            String svgFileName = "uml_diagram_" + randomIdentifier + ".svg";
-            String svgFilePath = tempFolder.getAbsolutePath() + File.separator + svgFileName;
-            FileOutputStream fileOutputStream = new FileOutputStream(svgFilePath);
-            outputStream.writeTo(fileOutputStream);
-            fileOutputStream.close();
-
-            System.out.println("SVG saved to: " + svgFilePath);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Image</title>
+    <style>
+        .image-container {
+            width: 500px; /* Set the desired width */
+            height: 300px; /* Set the desired height */
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #ccc; /* Optional border for visibility */
         }
-    }
-}
+
+        .draggable {
+            width: 1000px; /* Ensure the inner container is larger than the outer container */
+            height: 600px; /* Ensure the inner container is larger than the outer container */
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: grab;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="image-container">
+        <div class="draggable">
+            <img src="your-image.jpg" alt="Draggable Image">
+        </div>
+    </div>
+
+    <script>
+        const container = document.querySelector('.image-container');
+        const draggable = document.querySelector('.draggable');
+
+        let isDragging = false;
+        let startX, startY;
+        let initialX = 0, initialY = 0;
+
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - initialX;
+            startY = e.clientY - initialY;
+            container.style.cursor = 'grabbing';
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                initialX = e.clientX - startX;
+                initialY = e.clientY - startY;
+                draggable.style.transform = `translate(${initialX}px, ${initialY}px)`;
+            }
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+            container.style.cursor = 'grab';
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+            container.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>
